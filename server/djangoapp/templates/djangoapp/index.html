@@ -22,7 +22,7 @@
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse d-flex justify-content-end" id="navbarSupportedContent">
-            <ul class="navbar-nav me-5 mb-2 mb-lg-0 flex-nowrap align-items-center">
+            <ul style="margin-right:40px;" class="navbar-nav flex-nowrap align-items-center">
                 <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="#">Home</a>
                 </li>
@@ -33,24 +33,27 @@
                 <a class="nav-link" href="{% url 'djangoapp:contact' %}">Contact Us</a>
                 </li>
             </ul>
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-nowrap align-items-center">
+            <ul class="navbar-nav flex-nowrap align-items-center">
                 {% if not user.is_authenticated %} 
                     <li>
-                        <form class="input-group">
-                            <input type="text" class="form-control" placeholder="Username">
-                            <input type="text" class="form-control" placeholder="Password">
-                            <button class="btn btn-primary" type="button">Login</button>
-                        </form>
+                        <form method="POST" action="{% url 'djangoapp:login' %}" class="input-group">
+                            {% csrf_token %}
+                            <label for="username" class="form-label"></label>
+                            <input type="text" class="form-control" name="username" placeholder="Username" required>
+                            <label for="psw" class="form-label"></label>
+                            <input type="password" class="form-control" name="psw" placeholder="Password" required>
+                            <button class="btn btn-primary" type="submit">Login</button>
+                        </form>                        
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'djangoapp:about' %}">Sign Up</a>
+                        <a class="nav-link" href="{% url 'djangoapp:signup' %}">Sign Up</a>
                     </li>
                 {% else %}
                     <li class="nav-item">
                         {{ user.username }}
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'djangoapp:about' %}">Logout</a>
+                        <a class="nav-link" href="{% url 'djangoapp:logout' %}">Logout</a>
                     </li>    
                 {% endif %}
             </ul>
