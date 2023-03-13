@@ -17,25 +17,42 @@
     <!--Add a nav bar here -->
     <nav class="navbar navbar-expand-lg bg-light">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#">Best Cars</a>
-          <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success" type="submit">Search</button>
-          </form>
+          <a class="navbar-brand text-dark" href="#">Dealership Review</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
+          <div class="collapse navbar-collapse d-flex justify-content-end" id="navbarSupportedContent">
+            <ul class="navbar-nav me-5 mb-2 mb-lg-0 flex-nowrap align-items-center">
+                <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="#">Home</a>
-              </li>
-              <li class="nav-item">
+                </li>
+                <li class="nav-item">
                 <a class="nav-link" href="{% url 'djangoapp:about' %}">About Us</a>
-              </li>
-              <li class="nav-item">
+                </li>
+                <li class="nav-item">
                 <a class="nav-link" href="{% url 'djangoapp:contact' %}">Contact Us</a>
-              </li>
+                </li>
+            </ul>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 flex-nowrap align-items-center">
+                {% if not user.is_authenticated %} 
+                    <li>
+                        <form class="input-group">
+                            <input type="text" class="form-control" placeholder="Username">
+                            <input type="text" class="form-control" placeholder="Password">
+                            <button class="btn btn-primary" type="button">Login</button>
+                        </form>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'djangoapp:about' %}">Sign Up</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        {{ user.username }}
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'djangoapp:about' %}">Logout</a>
+                    </li>    
+                {% endif %}
             </ul>
           </div>
         </div>
