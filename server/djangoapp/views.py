@@ -11,6 +11,10 @@ from django.contrib import messages
 from datetime import datetime
 import logging
 import json
+from .restapis import get_dealers_from_cf, get_dealer_reviews_by_id, post_request
+
+from .config_reader import ConfigReader
+CONFIG = ConfigReader.getInstance().read_config()
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -69,15 +73,43 @@ def registration_request(request):
 
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
-    context = {}
     if request.method == "GET":
-        return render(request, 'djangoapp/index.html', context)
-
+        url = f"{CONFIG.API_ENDPOINT}{CONFIG.GET_DEALERSHIP}"
+        # Get dealers from the URL
+        dealerships = get_dealers_from_cf(url)
+        # Concat all dealer's short name
+        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        # Return a list of dealer short name
+        return HttpResponse(dealer_names)
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 def get_dealer_details(request, dealer_id):
-    pass
+    if request.method == "GET":
+        url = f"{CONFIG.API_ENDPOINT}{CONFIG.GET_REVIEW}"
+        reviews = get_dealer_reviews_by_id(url, dealer_id=dealer_id)
+        context = [str(review) for review in reviews]
+        return HttpResponse(content=context)
 
 # Create a `add_review` view to submit a review
-def add_review(request, dealer_id):
-    pass
+def add_review(request, dealer_id, review_info):
+    # check if user is authenticated
+    if not request.user.is_authenticated:
+        return redirect(reverse('djangoapp:login'))
+    
+    if request.method == "GET":
+        review = {
+            "id": review_info.id,
+            "name": review.name,
+            "dealership": dealer_id,
+            "review": review.review,
+            "purchase": review.purchase,
+        }
+        if review.purchase:
+            review.purchase_date = datetime.utcnow().isoformat()
+            review.car_make = review_info.car_make
+            review.car_model = review_info.car_model
+            review.car_year = review_info.car_year
+
+        json_payload = { "review": review }
+
+        post_request(f"{CONFIG.API_ENDPOINT}{CONFIG.POST_REVIEW}", json_payload, dealerId=dealer_id)

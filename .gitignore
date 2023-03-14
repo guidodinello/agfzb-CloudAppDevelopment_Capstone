@@ -140,3 +140,5 @@ server/djangoapp/migrations/
 *.pyc
 server/djangoapp/migrations/
 
+# ignore sensitive information
+config.json
