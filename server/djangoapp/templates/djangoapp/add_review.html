@@ -1,16 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    {% load static %}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker.css" rel="stylesheet">
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.js"></script>
+{% extends 'base.html' %}
 
-</head>
-    <body>
-    <!--Add review form here -->
-    </body>
-</html>
+{% block title %}Add Review{% endblock %}
+
+{% block content %}
+    <h1>Testing</h1>
+    <!-- <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">{{ title }}</div>
+                    <div class="card-body">
+                        <form action="{% url 'djangoapp:add_review' %}" method="POST">
+                            <div class="container">
+                                {% csrf_token %}
+                                <h1>Add Review</h1>
+                                <hr>
+                                <div class="form-group">
+                                    <label class="mt-2 mb-0" for="name"><b>Name</b></label>
+                                    <input type="text" class="form-control"
+                                        name="name" required>
+
+                                    <label class="mt-2 mb-0" for="review"><b>Review</b></label>
+                                    <input type="text" class="form-control"                                        name="review" required>
+                                    
+                                    <label class="mt-2 mb-0" for="purchase"><b>Purchase</b></label>
+                                    <input type="checkbox" class="form-control"
+                                        name="checkbox" required>
+
+                                    <button class="btn btn-primary mt-3" type="submit">Submit review</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+{% endblock %}

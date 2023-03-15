@@ -1,18 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Dealership Review</title>
-    {% load static %}
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-</head>
+{% extends 'base.html' %}
 
-    <body>
+{% block title %}Dealership Review{% endblock %}
 
-    <!--Add a nav bar here -->
+{% block content %}
 
     <!-- Add reviews as cards -->
+    <div class="row p-5">
+        {% for review in reviews %}
+            <div class="col-md-4 mb-3">
+                {% include 'review_card.html' with review=review %}
+            </div>
+        {% endfor %}
+    </div>
 
-    </body>
-
-</html>
+{% endblock %}

@@ -1,0 +1,13 @@
+<div class="card bg-light">
+    <div class="card-body">
+        <h5 class="card-title">{{ dealership.short_name }}</h5>
+        <hr>
+        <p class="card-text">{{ dealership.description }}</p>
+        <a href="{% url 'djangoapp:dealer_details' dealer_id=dealership.id %}" class="btn btn-primary">See my reviews</a>
+        <ul>
+            <li>{{ dealership.address }}</li>
+            <li>{{ dealership.city }}, {{ dealership.state }} {{ dealership.zip }}</li>
+        </ul>
+        <a href="{% url 'djangoapp:add_review' dealer_id=dealership.id %}" class="btn btn-primary">Add a review</a>
+    </div>
+</div>

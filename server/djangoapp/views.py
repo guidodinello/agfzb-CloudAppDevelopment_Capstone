@@ -70,35 +70,32 @@ def registration_request(request):
             return render(request, 'djangoapp/registration.html', 
                         context={'message' : "User already exists."})
 
-
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     if request.method == "GET":
-        url = f"{CONFIG.API_ENDPOINT}{CONFIG.GET_DEALERSHIP}"
-        # Get dealers from the URL
-        dealerships = get_dealers_from_cf(url)
-        # Concat all dealer's short name
-        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
-        # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        return render(request, 'djangoapp/index.html', 
+               context={"dealerships": get_dealers_from_cf()})
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
 def get_dealer_details(request, dealer_id):
     if request.method == "GET":
-        url = f"{CONFIG.API_ENDPOINT}{CONFIG.GET_REVIEW}"
-        reviews = get_dealer_reviews_by_id(url, dealer_id=dealer_id)
-        context = [str(review) for review in reviews]
-        return HttpResponse(content=context)
+        reviews = get_dealer_reviews_by_id(dealer_id=dealer_id)
+        return HttpResponse(content=reviews)
 
 # Create a `add_review` view to submit a review
-def add_review(request, dealer_id, review_info):
-    # check if user is authenticated
+def add_review(request, dealer_id):
+
+    # only authenticated users can post reviews
     if not request.user.is_authenticated:
         return redirect(reverse('djangoapp:login'))
     
     if request.method == "GET":
+        return render(request, 'djangoapp/add_review.html', context={'dealer_id': dealer_id})
+
+    if request.method == "POST":
+        id = hash(datetime.utcnow().isoformat())^hash(dealer_id)
         review = {
-            "id": review_info.id,
+            "id": id,
             "name": review.name,
             "dealership": dealer_id,
             "review": review.review,
@@ -112,4 +109,6 @@ def add_review(request, dealer_id, review_info):
 
         json_payload = { "review": review }
 
-        post_request(f"{CONFIG.API_ENDPOINT}{CONFIG.POST_REVIEW}", json_payload, dealerId=dealer_id)
+        response = post_request(f"{CONFIG['API_ENDPOINT']}{CONFIG['POST_REVIEW']}", json_payload, dealerId=dealer_id)
+
+        return HttpResponse(content=response)

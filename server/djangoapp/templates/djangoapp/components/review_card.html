@@ -1,0 +1,16 @@
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">{{ review.name }}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Dealership {{ review.dealership }}</h6>
+        <p class="card-text">{{ review.review }}</p>
+        <p class="card-text">{{ review.sentiment }}</p>
+
+        {% if review.purchase %}
+            <p class="card-text">Purchased Car</p>
+            <p class="card-text">{{ review.car_make }}</p>
+            <p class="card-text">{{ review.car_model }}</p>
+            <p class="card-text">{{ review.car_year }}</p>
+            <p class="card-text">{{ review.purchase_date }}</p>
+        {% endif %}
+    </div>
+</div>
