@@ -11,7 +11,9 @@ from django.contrib import messages
 from datetime import datetime
 import logging
 import json
-from .restapis import get_dealers_from_cf, get_dealer_reviews_by_id, post_request
+
+from .models import CarModel
+from .restapis import get_dealers_from_cf, get_dealer_reviews_by_id, post_request, get_dealer_by_id
 
 from .config_reader import ConfigReader
 CONFIG = ConfigReader.getInstance().read_config()
@@ -79,36 +81,54 @@ def get_dealerships(request):
 # Create a `get_dealer_details` view to render the reviews of a dealer
 def get_dealer_details(request, dealer_id):
     if request.method == "GET":
-        reviews = get_dealer_reviews_by_id(dealer_id=dealer_id)
-        return HttpResponse(content=reviews)
+        context = {
+            "reviews": get_dealer_reviews_by_id(dealer_id=dealer_id), 
+            "dealer_id": dealer_id,
+            "dealer_name": get_dealer_by_id(dealer_id)[0].full_name,
+        }
+        return render(request, 'djangoapp/dealer_details.html', context=context)
 
 # Create a `add_review` view to submit a review
 def add_review(request, dealer_id):
-
     # only authenticated users can post reviews
     if not request.user.is_authenticated:
         return redirect(reverse('djangoapp:login'))
     
     if request.method == "GET":
-        return render(request, 'djangoapp/add_review.html', context={'dealer_id': dealer_id})
+        cars = CarModel.objects.filter(dealerId=dealer_id)
+        print("CARS", cars)
+        context = { 
+            "dealer_id": dealer_id,
+            "dealer_name": get_dealer_by_id(dealer_id)[0].full_name,
+            "cars" : cars
+        }
+        return render(request, 'djangoapp/add_review.html', context)
 
     if request.method == "POST":
+        print("request POST data ", request.POST)
         id = hash(datetime.utcnow().isoformat())^hash(dealer_id)
+        form = request.POST
         review = {
-            "id": id,
-            "name": review.name,
+            "id": hash(datetime.utcnow().isoformat())^hash(dealer_id)^hash(form['username']),
+            "name": form['username'],
             "dealership": dealer_id,
-            "review": review.review,
-            "purchase": review.purchase,
+            "review": form['content'],
+            "purchase": True if form['purchasecheck'] == 'on' else False,
         }
-        if review.purchase:
-            review.purchase_date = datetime.utcnow().isoformat()
-            review.car_make = review_info.car_make
-            review.car_model = review_info.car_model
-            review.car_year = review_info.car_year
+        if review['purchase']:
+            car = CarModel.objects.get(id=form['car_id'][0])
 
-        json_payload = { "review": review }
+            print("CAR MAKE", car.make.name)
+            print("CAR MODEL", car.name)
+            print("CAR YEAR", car.year)
 
-        response = post_request(f"{CONFIG['API_ENDPOINT']}{CONFIG['POST_REVIEW']}", json_payload, dealerId=dealer_id)
+            review['purchase_date'] = form['purchasedate']
+            review['car_make'] = car.make.name
+            review['car_model'] = car.name
+            review['car_year'] = car.year.strftime("%Y")
 
-        return HttpResponse(content=response)
+        response = post_request(f"{CONFIG['API_ENDPOINT']}{CONFIG['POST_REVIEW']}", json_payload=review, dealerId=dealer_id)
+
+        print(response.content)
+
+        return redirect("djangoapp:dealer_details", dealer_id=dealer_id)

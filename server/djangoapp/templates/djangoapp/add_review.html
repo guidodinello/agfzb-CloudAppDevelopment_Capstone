@@ -3,37 +3,56 @@
 {% block title %}Add Review{% endblock %}
 
 {% block content %}
-    <h1>Testing</h1>
-    <!-- <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">{{ title }}</div>
-                    <div class="card-body">
-                        <form action="{% url 'djangoapp:add_review' %}" method="POST">
-                            <div class="container">
-                                {% csrf_token %}
-                                <h1>Add Review</h1>
-                                <hr>
-                                <div class="form-group">
-                                    <label class="mt-2 mb-0" for="name"><b>Name</b></label>
-                                    <input type="text" class="form-control"
-                                        name="name" required>
+<div class="row p-5 justify-content-center">
+    <form action="{% url 'djangoapp:add_review' dealer_id %}" method="POST" class="card p-4 w-50">
+        <h4>Add a review about <b>{{ dealer_name }}</b></h4>
+        <hr>
+        {% csrf_token %}
+        <input type="hidden" name="username" value="{{ user.username }}">
 
-                                    <label class="mt-2 mb-0" for="review"><b>Review</b></label>
-                                    <input type="text" class="form-control"                                        name="review" required>
-                                    
-                                    <label class="mt-2 mb-0" for="purchase"><b>Purchase</b></label>
-                                    <input type="checkbox" class="form-control"
-                                        name="checkbox" required>
+        <label for="content">Enter the review content: </label>
+        <textarea class="form-control" name="content" rows="3" placeholder="Leave your opinion" required></textarea>
 
-                                    <button class="btn btn-primary mt-3" type="submit">Submit review</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+        <div class="mt-4">
+            <input type="checkbox" name="purchasecheck" id="purchasecheck">
+            <label for="purchasecheck">Has purchased the car from {{ dealer_name }} </label>
         </div>
-    </div> -->
+
+        <section id="purchaseData" style="display:none" class="mt-3">
+            <div class="row align-items-center">
+                <label class="col m-0" for="car_id">Select your car (model-make-year): </label>
+                <select name="car_id" id="car" class="form-select col">
+                    <option value="" selected disabled>Choose here</option>
+                    {% for car in cars %}
+                    <option value="{{car.id}}">{{car.name}}-{{car.make}}-{{ car.year|date:"Y" }}</option>
+                    {% endfor %}
+                </select>    
+            </div>
+
+            <div class="row mt-4 align-items-center"> 
+                <label class="col m-0" for="purchasedate">Select your purchase date: </label>
+                <input class="date-own form-control col" type="date" name="purchasedate" id="purchasedate">
+            </div>
+        </section>
+
+        <div class="d-flex justify-content-center">
+            <input type="submit" value="Submit" class="btn btn-primary w-50 mt-4 justify-self-center"/>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block closer %}
+<script>
+    const purchaseCheck = document.getElementById('purchasecheck');
+    const purchaseData = document.getElementById('purchaseData');
+
+    purchaseCheck.addEventListener('change', function () {
+        if (this.checked) {
+            purchaseData.style.display = 'block';
+        } else {
+            purchaseData.style.display = 'none';
+        }
+    });
+</script>
 {% endblock %}

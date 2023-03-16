@@ -4,6 +4,11 @@ import json
 from .models import CarDealer, DealerReview
 from requests.auth import HTTPBasicAuth
 
+from ibm_watson import NaturalLanguageUnderstandingV1
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+
+from functools import lru_cache
+
 from .config_reader import ConfigReader
 CONFIG = ConfigReader.getInstance().read_config()
 
@@ -31,13 +36,13 @@ def post_request(url, json_payload, **kwargs):
     print(f"POST to {url} with params {kwargs}")
     try:
         # Call get method of requests library with URL and parameters
-        response = requests.post(url, params=kwargs, json=json_payload)
-    except:
+        response = requests.post(url, headers={'Content-Type': 'application/json'},
+                                 params=kwargs, json=json_payload)
+        return response
+    except Exception as e:
         # If any error occurs
-        print("Network exception occurred")
-
-    print(f"With status {response.status_code}")
-    return response
+        print("Exception", e)
+    
 
 
 # Create a get_dealers_from_cf method to get dealers from a cloud function
@@ -73,20 +78,26 @@ def constructor_dealer_review(row):
         id=row["id"],
         dealership=row["dealership"], 
         name=row["name"], 
-        purchase=row["purchase"],
         review=row["review"], 
-        purchase_date=row["purchase_date"],
-        make=row["car_make"], 
-        model=row["car_model"], 
-        year=row["car_year"],
-        sentiment=analyze_review_sentiments(row["review"]))
+        sentiment=analyze_review_sentiments(row["review"]),
+        purchase=row["purchase"],
+        purchase_date=row.get("purchase_date", None),
+        make=row.get("car_make", None), 
+        model=row.get("car_model", None), 
+        year=row.get("car_year", None))
 
 def get_dealers_from_cf():
     url = f"{CONFIG['API_ENDPOINT']}{CONFIG['GET_DEALERSHIP']}"
     return get_from_cf(url, constructor_car_dealer)
-def get_dealers_by_state(url, state):
+def get_dealers_by_state(state):
     url = f"{CONFIG['API_ENDPOINT']}{CONFIG['GET_DEALERSHIP']}"
     return get_from_cf(url, constructor_car_dealer, STATE=state)
+
+# dealer id wont change so we can cache it
+@lru_cache
+def get_dealer_by_id(id):
+    url = f"{CONFIG['API_ENDPOINT']}{CONFIG['GET_DEALERSHIP']}"
+    return get_from_cf(url, constructor_car_dealer, ID=id)
 
 # Create a get_dealer_reviews_from_cf method to get reviews by dealer id from a cloud function
 # def get_dealer_by_id_from_cf(url, dealerId):
@@ -102,22 +113,24 @@ def get_dealer_reviews_by_id(dealer_id):
 # - Get the returned sentiment label such as Positive or Negative
 def analyze_review_sentiments(review_text):
     print(f"Analyzing text: {review_text}")
-    params = {
-        'version': '2021-09-01',
-        'features': {
-            'entities': {},
-            'keywords': {}
+
+    endpoint = f"{CONFIG['NLU_URL']}/v1/analyze?version=2019-07-12"
+    payload = {
+        "text": review_text,
+        "features": {
+            "sentiment": {}
         }
     }
-
-    data = { 'text': review_text }
-
     headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f"Basic {CONFIG['NLU_API_KEY']}"
+        "Content-Type": "application/json"
     }
+    auth = ("apikey", CONFIG['NLU_API_KEY'])
 
-    response = requests.post(CONFIG['NLU_URL'], headers=headers, params=params, json=data)
+    response = requests.post(url=endpoint, json=payload, headers=headers, auth=auth)
+
+    print(f"Response: {response.text}")
+
+    return response.json()["sentiment"]["document"]["label"]
 
     
 

@@ -4,13 +4,22 @@
 
 {% block content %}
 
+    {% if user.is_authenticated %}
+        <div class="position-absolute top-10 end-0 pe-3 pt-1">
+            <a class="btn btn-primary" href="{% url 'djangoapp:add_review' dealer_id=dealer_id %}">Add a review</a>
+        </div>
+    {% endif %}
+
     <!-- Add reviews as cards -->
-    <div class="row p-5">
-        {% for review in reviews %}
-            <div class="col-md-4 mb-3">
-                {% include 'review_card.html' with review=review %}
+    <div class="float-start p-3 w-100">
+        <h4>Reviews for <b>{{ dealer_name }}</b></h4>
+        <div class="row p-5">
+            <div class="card-columns">
+                {% for review in reviews %}
+                    {% include 'review_card.html' with review=review %}
+                {% endfor %}
             </div>
-        {% endfor %}
+        </div>
     </div>
 
 {% endblock %}
