@@ -15,8 +15,9 @@ import json
 from .models import CarModel
 from .restapis import get_dealers_from_cf, get_dealer_reviews_by_id, post_request, get_dealer_by_id
 
-from .config_reader import ConfigReader
-CONFIG = ConfigReader.getInstance().read_config()
+import os
+API_ENDPOINT = os.environ.get('API_ENDPOINT')
+POST_REVIEW_ENDPOINT = f"{API_ENDPOINT}/post-review.json"
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -127,7 +128,7 @@ def add_review(request, dealer_id):
             review['car_model'] = car.name
             review['car_year'] = car.year.strftime("%Y")
 
-        response = post_request(f"{CONFIG['API_ENDPOINT']}{CONFIG['POST_REVIEW']}", json_payload=review, dealerId=dealer_id)
+        response = post_request(POST_REVIEW_ENDPOINT, json_payload=review, dealerId=dealer_id)
 
         print(response.content)
 
